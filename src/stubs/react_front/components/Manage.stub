@@ -1,0 +1,149 @@
+import React, { Component } from "react";
+import {{modelName}}Service from "@/Services/{{modelName}}Service";
+import InputLabel from "../InputLabel";
+import TextInput from "../TextInput";
+import Loader from '@/Components/Loader';
+
+export default class Manage{{modelName}}Component extends Component {
+
+    {{modelNameLowerCase}}_selectors = {{selectors}}
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            loading: false,
+            id: props.id ? props.id : "",
+            buttonText: props.id ? "Update" : "Create {{modelName}}",
+            {{modelNameLowerCase}}: {{definition}}
+            {{modelNameLowerCase}}Load: false,
+            errorMsg: null
+        };
+    }
+
+
+    saveOrUpdate{{modelName}}({{modelNameLowerCase}}) {
+
+        var thisClass = this;
+
+        if (this.state.id === "") {
+            {{modelName}}Service.create{{modelName}}({{modelNameLowerCase}})
+                .then((res) => {
+                    thisClass.setState({ loading: false })
+                    window.location = route("{{modelNameLowerCase}}.index");
+                })
+                .catch(function (error) {
+                    thisClass.setState({
+                        loading: false,
+                        errorMsg: "Error CREATING Client"
+                    });
+                });
+        } else {
+            {{modelNameLowerCase}}.append("id", this.state.{{modelNameLowerCase}}.id);
+            {{modelName}}Service.update{{modelName}}({{modelNameLowerCase}})
+                .then((res) => {
+                    thisClass.setState({ loading: false })
+                    window.location = route("{{modelNameLowerCase}}.index");
+                })
+                .catch(function (error) {
+                    thisClass.setState({
+                        loading: false,
+                        errorMsg: "Error UPDATING Client"
+                    });
+                });
+        }
+    }
+
+    handleInputChange = (input) => {
+        const { name, value, type } = input.target;
+        this.setState(prevState => ({
+            {{modelNameLowerCase}}: {
+                ...prevState.{{modelNameLowerCase}},
+                [name]: type == "checkbox" ? (value == "on" || value == 1 ? null : 1) : value,
+            }
+        }));
+    };
+
+    cancel() {
+        window.location = route("{{modelNameLowerCase}}s");
+    }
+
+    componentDidMount() {
+        if (this.state.id) {
+            {{modelName}}Service.get{{modelName}}ById(this.state.id).then((res) => {
+                this.setState({ {{modelNameLowerCase}}: res.data.data });
+                this.setState({ {{modelNameLowerCase}}Load: true });
+            });
+        } else {
+            this.setState({ {{modelNameLowerCase}}Load: true });
+        }
+    }
+
+    render() {
+        const handleOnSubmit = (e) => {
+            e.preventDefault();
+
+            this.setState({ loading: true })
+
+            const form = new FormData(e.target);
+            const {{modelNameLowerCase}} = new FormData();
+            for (var pair of form.entries()) {
+                {{modelNameLowerCase}}.append(pair[0], pair[1]);
+            }
+            this.saveOrUpdate{{modelName}}({{modelNameLowerCase}});
+        };
+
+        return (
+            <div>
+                {!this.state.{{modelNameLowerCase}}Load && <Loader />}
+                {this.state.{{modelNameLowerCase}}Load && (
+                    <React.Fragment>
+                        <center>
+                            {this.state.errorMsg && (
+                                <div
+                                    className="bg-red-100 md:w-1/2 text-center rounded-lg py-5 px-6 mb-3 text-base text-red-700 inline-flex items-center w-full"
+                                    role="alert"
+                                >
+                                    <svg
+                                        aria-hidden="true"
+                                        focusable="false"
+                                        data-prefix="fas"
+                                        data-icon="times-circle"
+                                        className="w-4 h-4 mr-2 fill-current"
+                                        role="img"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 512 512"
+                                    >
+                                        <path
+                                            fill="currentColor"
+                                            d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z"
+                                        ></path>
+                                    </svg>
+                                    {this.state.errorMsg}
+                                </div>
+                            )}
+                            <form onSubmit={handleOnSubmit} encType="multipart/form-data">
+                                {{form}}
+
+                                <div className="w-full md:w-auto p-2">
+                                    <div className="flex flex-wrap justify-between -m-1.5 pt-5  border-t border-coolGray-100">
+                                        <div className="w-full md:w-auto p-1.5">
+                                            <a key="link0" href="/" className="btn flex flex-wrap justify-center w-full px-4 py-2 font-medium text-sm text-coolGray-500 hover:text-coolGray-600 border border-coolGray-200 hover:border-coolGray-300 bg-white rounded-md shadow-button">
+                                                <p>Cancel</p>
+                                            </a>
+                                        </div>
+                                        <div className="w-full md:w-auto p-1.5">
+                                            <button type="submit" className="submit-btn inline-flex items-center px-4 py-2 bg-gray-900 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest active:bg-gray-900 transition ease-in-out duration-150">
+                                                { this.state.loading && <Loader size="4"/> }
+                                                { this.state.buttonText }
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </center>
+                    </React.Fragment>
+                )}
+            </div>
+        );
+    }
+}

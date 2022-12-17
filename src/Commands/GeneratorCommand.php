@@ -74,6 +74,41 @@ abstract class GeneratorCommand extends Command
     protected $controllerNamespace = 'App\Http\Controllers';
 
     /**
+     * Entity Namespace.
+     *
+     * @var string
+     */
+    protected $entityNamespace = 'Domain\Entity';
+
+    /**
+     * Repository Namespace.
+     *
+     * @var string
+     */
+    protected $repositoryNamespace = 'Infrastructure\Repository';
+
+    /**
+     * RepositoryInterface Namespace.
+     *
+     * @var string
+     */
+    protected $repositoryInterfaceNamespace = 'Domain\Repository';
+
+    /**
+     * Repository Exception Namespace.
+     *
+     * @var string
+     */
+    protected $exceptionRepositoryNamespace = 'Domain\Exception\Repository';
+
+    /**
+     * UseCase Namespace.
+     *
+     * @var string
+     */
+    protected $usecaseNamespace = 'Application\Usecase';
+
+    /**
      * Application Layout
      *
      * @var string
@@ -86,6 +121,10 @@ abstract class GeneratorCommand extends Command
      * @var array
      */
     protected $options = [];
+
+    protected $architecture = 'default';
+    protected $srcPath = 'Src';
+    protected $front = 'default';
 
     /**
      * Create a new controller creator command instance.
@@ -102,7 +141,33 @@ abstract class GeneratorCommand extends Command
         $this->unwantedColumns = config('crud.model.unwantedColumns', $this->unwantedColumns);
         $this->modelNamespace = config('crud.model.namespace', $this->modelNamespace);
         $this->controllerNamespace = config('crud.controller.namespace', $this->controllerNamespace);
+        $this->srcPath = config('crud.src', $this->srcPath);
+        $this->architecture = config('crud.architecture_mode', $this->architecture);
         $this->layout = config('crud.layout', $this->layout);
+        $this->front = config('crud.front', $this->front);
+    }
+
+    protected function correctPaths()
+    {
+        $path = $this->option('path');
+        $prefix = '';
+        $subfix = '';
+
+        if ($path) {
+            if ($this->architecture == 'ddd') {
+                $prefix = '';
+                $subfix = '\\'.$path;
+            } else if ($this->architecture == 'hexagonal') {
+                $prefix = $path.'\\';
+                $subfix = '';
+            }
+        }
+
+        $this->entityNamespace = $this->srcPath.'\\'.$prefix.$this->entityNamespace.$subfix;
+        $this->repositoryNamespace = $this->srcPath.'\\'.$prefix.$this->repositoryNamespace.$subfix;
+        $this->repositoryInterfaceNamespace = $this->srcPath.'\\'.$prefix.$this->repositoryInterfaceNamespace.$subfix;
+        $this->exceptionRepositoryNamespace = $this->srcPath.'\\'.$prefix.$this->exceptionRepositoryNamespace.$subfix;
+        $this->usecaseNamespace = $this->srcPath.'\\'.$prefix.$this->usecaseNamespace.$subfix;
     }
 
     /**
@@ -209,6 +274,56 @@ abstract class GeneratorCommand extends Command
      *
      * @return string
      */
+    protected function _getEntityPath($name)
+    {
+        return $this->makeDirectory(app_path($this->_getNamespacePathOutOfApp($this->entityNamespace) . "{$name}Entity.php"));
+    }
+
+    /**
+     * @param $name
+     *
+     * @return string
+     */
+    protected function _getRepositoryPath($name)
+    {
+        return $this->makeDirectory(app_path($this->_getNamespacePathOutOfApp($this->repositoryNamespace) . "{$name}Repository.php"));
+    }
+
+    /**
+     * @param $name
+     *
+     * @return string
+     */
+    protected function _getRepositoryInterfacePath($name)
+    {
+        return $this->makeDirectory(app_path($this->_getNamespacePathOutOfApp($this->repositoryInterfaceNamespace) . "{$name}RepositoryInterface.php"));
+    }
+
+    /**
+     * @param $name
+     *
+     * @return string
+     */
+    protected function _getRepositoryExceptionPath($name)
+    {
+        return $this->makeDirectory(app_path($this->_getNamespacePathOutOfApp($this->exceptionRepositoryNamespace) . "{$name}RepositoryException.php"));
+    }
+
+    /**
+     * @param $name
+     *
+     * @return string
+     */
+    protected function _getUseCasePath($name)
+    {
+        return $this->makeDirectory(app_path($this->_getNamespacePathOutOfApp($this->usecaseNamespace) . "{$name}UseCase.php"));
+    }
+
+    /**
+     * @param $name
+     *
+     * @return string
+     */
     protected function _getModelPath($name)
     {
         return $this->makeDirectory(app_path($this->_getNamespacePath($this->modelNamespace) . "{$name}.php"));
@@ -226,6 +341,20 @@ abstract class GeneratorCommand extends Command
         $str = Str::start(Str::finish(Str::after($namespace, 'App'), '\\'), '\\');
 
         return str_replace('\\', '/', $str);
+    }
+
+    /**
+     * Get the path from namespace.
+     *
+     * @param $namespace
+     *
+     * @return string
+     */
+    private function _getNamespacePathOutOfApp($namespace)
+    {
+        $str = lcfirst($namespace)."/";
+
+        return str_replace('\\', '/', '../'.$str);
     }
 
     /**
@@ -263,6 +392,11 @@ abstract class GeneratorCommand extends Command
             '{{modelTitle}}' => Str::title(Str::snake($this->name, ' ')),
             '{{modelNamespace}}' => $this->modelNamespace,
             '{{controllerNamespace}}' => $this->controllerNamespace,
+            '{{entityNamespace}}' => $this->entityNamespace,
+            '{{usecaseNamespace}}' => $this->usecaseNamespace,
+            '{{repositoryNamespace}}' => $this->repositoryNamespace,
+            '{{repositoryInterfaceNamespace}}' => $this->repositoryInterfaceNamespace,
+            '{{exceptionRepositoryNamespace}}' => $this->exceptionRepositoryNamespace,
             '{{modelNamePluralLowerCase}}' => Str::camel(Str::plural($this->name)),
             '{{modelNamePluralUpperCase}}' => ucfirst(Str::plural($this->name)),
             '{{modelNameLowerCase}}' => Str::camel($this->name),
@@ -290,7 +424,98 @@ abstract class GeneratorCommand extends Command
         ]);
 
         return str_replace(
-            array_keys($replace), array_values($replace), $this->getStub("views/{$type}")
+            array_keys($replace), array_values($replace), $this->getStub("default_front/views/{$type}")
+        );
+    }
+
+    /**
+     * Build the form fields for form.
+     *
+     * @param $title
+     * @param $column
+     * @param string $type
+     *
+     * @return mixed
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     *
+     */
+    protected function getFieldReact($title, $column)
+    {
+        $stub = "react_front/form_stubs/form-field-";
+
+        $replace = array_merge($this->buildReplacements(), [
+            '{{title}}' => $title,
+            '{{column}}' => $column->Field,
+            '{{value}}' => $column->Default
+        ]);
+
+        switch (true) {
+            case str_starts_with($column->Type, "tinyint(1)"):
+                $stub .= "onoff";
+                break;
+            case str_starts_with($column->Type, "int"):
+                $stub .= "number";
+                break;
+            case str_starts_with($column->Type, "double") || str_starts_with($column->Type, "float"):
+                $stub .= "decimal-number";
+                break;
+            case str_starts_with($column->Type, "enum"):
+                $stub .= "select";
+                break;
+            case str_starts_with($column->Type, "text"):
+                $stub .= "textarea";
+                break;
+            default:
+                $stub .= "text";
+                break;
+        }
+
+        return str_replace(
+            array_keys($replace), array_values($replace), $this->getStub($stub)
+        );
+    }
+
+    protected function getFieldAttributeReact($column)
+    {
+        switch (true) {
+            case str_starts_with($column->Type, "tinyint(1)"):
+                return ($column->Default)? 1 : 0;
+            case str_starts_with($column->Type, "int"):
+                return ($column->Default)?? 0;
+            case str_starts_with($column->Type, "double") || str_starts_with($column->Type, "float"):
+                return ($column->Default)?? 0;
+            case str_starts_with($column->Type, "enum"):
+                $value = $column->Default?? "";
+                return "'".$value."'";
+            case str_starts_with($column->Type, "text"):
+                return "''";
+            default:
+                $value = $column->Default?? "";
+                return "'".$value."'";
+        }
+    }
+
+    protected function getListFromEnum($string)
+    {
+        $result = '[';
+        preg_match("/\(([^)]+)\)/", $string, $matches);
+        $array = explode(",", $matches[1]);
+        foreach($array as $item) {
+            $result .= "
+                \t\t{ name: ".Str::title(Str::snake($item, ' ')).", code: ".$item."},";
+        }
+        return $result."\n\t\t\t\t]";
+    }
+
+    protected function getFilterReact($title, $column)
+    {
+        $replace = array_merge($this->buildReplacements(), [
+            '{{title}}' => $title,
+            '{{column}}' => $column,
+        ]);
+
+        return str_replace(
+            array_keys($replace), array_values($replace), $this->getStub("react_front/filter-li")
         );
     }
 
@@ -313,6 +538,25 @@ abstract class GeneratorCommand extends Command
     }
 
     /**
+     * @param $title
+     *
+     * @return mixed
+     */
+    protected function getHeadReact($title)
+    {
+        $replace = array_merge($this->buildReplacements(), [
+            '{{title}}' => $title,
+        ]);
+
+        return str_replace(
+            array_keys($replace),
+            array_values($replace),
+            $this->_getSpace(11) . '<th scope="col" className="text-sm font-medium text-white px-6 py-2">{{title}}</th>' . "\n"
+        );
+        
+    }
+
+    /**
      * @param $column
      *
      * @return mixed
@@ -330,6 +574,85 @@ abstract class GeneratorCommand extends Command
         );
     }
 
+    protected function buildWebRoutes()
+    {
+        $routes = "\n\tRoute::prefix('{{modelNameLowerCase}}')->group(function () {
+        Route::get('/', function () { return Inertia::render('{{modelName}}/CRUD/index'); })->name('{{modelNameLowerCase}}.index');
+        Route::get('/create', function () { return Inertia::render('{{modelName}}/CRUD/manage'); })->name('{{modelNameLowerCase}}.manage.create');
+        Route::get('/edit/{id}', function (\$id) { return Inertia::render('{{modelName}}/CRUD/manage', ['id' => \$id]); })->name('{{modelNameLowerCase}}.manage.edit');
+    });";
+
+        $replace = array_merge($this->buildReplacements(), []);
+
+        return str_replace(
+            array_keys($replace),
+            array_values($replace),
+            $routes
+        );
+    }
+
+    protected function buildApiRoutes()
+    {
+        $routes = "\nRoute::group(['prefix' => '{{modelNameLowerCase}}'], function() {
+    Route::controller('{{modelName}}Controller')->group(function () {
+        Route::get('/get', 'getAction');
+        Route::delete('/delete', 'deleteAction');
+        Route::post('/create', 'createAction');
+        Route::put('/update', 'updateAction');
+    });
+});";
+
+        $replace = array_merge($this->buildReplacements(), []);
+
+        return str_replace(
+            array_keys($replace),
+            array_values($replace),
+            $routes
+        );
+    }
+
+    protected function buildBindings()
+    {
+        $replace = array_merge($this->buildReplacements(), []);
+        $controller_bind = "\$this->app->bind('{{modelName}}Controller', \App\Http\Controllers\{{modelName}}Controller::class);";
+        $repository_bind = "\$this->app->bind(\Src\Domain\Repository\{{modelName}}RepositoryInterface::class, \Src\Infrastructure\Repository\{{modelName}}Repository::class);";
+
+        return [
+            'controller_bind' => str_replace(
+                array_keys($replace),
+                array_values($replace),
+                $controller_bind
+            ),
+            'repository_bind' => str_replace(
+                array_keys($replace),
+                array_values($replace),
+                $repository_bind
+            )
+        ];
+    }
+
+    /**
+     * @param $column
+     *
+     * @return mixed
+     */
+    protected function getBodyReact($column)
+    {
+        $replace = array_merge($this->buildReplacements(), [
+            '{{column}}' => $column,
+        ]);
+
+        return str_replace(
+            array_keys($replace),
+            array_values($replace),
+            $this->_getSpace(12) . '<td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">' . "\n".
+            $this->_getSpace(13) . '<div className="text-sm text-gray-500">'. "\n" .
+            $this->_getSpace(14) . '{ {{modelNameLowerCase}}.{{column}} }'. "\n" .
+            $this->_getSpace(13) . '</div>'. "\n".
+            $this->_getSpace(12) . '</td>' . "\n"
+        );
+    }
+
     /**
      * Make layout if not exists.
      *
@@ -342,7 +665,7 @@ abstract class GeneratorCommand extends Command
             $this->info('Creating Layout ...');
 
             if ($this->layout == 'layouts.app') {
-                $this->files->copy($this->getStub('layouts/app', false), $this->_getLayoutPath());
+                $this->files->copy($this->getStub('default_front/layouts/app', false), $this->_getLayoutPath());
             } else {
                 throw new \Exception("{$this->layout} layout not found!");
             }
@@ -381,6 +704,23 @@ abstract class GeneratorCommand extends Command
     }
 
     /**
+     * @return array
+     */
+    protected function getColumnsInfo()
+    {
+        $unwanted = $this->unwantedColumns;
+        $columns = [];
+
+        foreach ($this->getColumns() as $column) {
+            $columns[$column->Field] = $column;
+        }
+
+        return array_filter($columns, function ($value) use ($unwanted) {
+            return !in_array($value, $unwanted);
+        });
+    }
+
+    /**
      * Make model attributes/replacements.
      *
      * @return array
@@ -390,12 +730,19 @@ abstract class GeneratorCommand extends Command
         $properties = '*';
         $rulesArray = [];
         $softDeletesNamespace = $softDeletes = '';
+        $is_id_string = false;
 
         foreach ($this->getColumns() as $value) {
             $properties .= "\n * @property $$value->Field";
 
             if ($value->Null == 'NO') {
                 $rulesArray[$value->Field] = 'required';
+            }
+
+            if ($value->Field == 'id') {
+                if ($this->isColumnString($value->Type)) {
+                    $is_id_string = true;
+                }
             }
 
             if ($value->Field == 'deleted_at') {
@@ -434,6 +781,14 @@ abstract class GeneratorCommand extends Command
 
         list($relations, $properties) = (new ModelGenerator($this->table, $properties, $this->modelNamespace))->getEloquentRelations();
 
+        $boot = ($is_id_string)? 'public static function boot()
+        {
+            parent::boot();
+            static::creating(function($obj){
+                $obj->id = RamseyUuid::uuid4()->toString();
+            });
+        }': '';
+
         return [
             '{{fillable}}' => $fillable(),
             '{{rules}}' => $rules(),
@@ -441,7 +796,56 @@ abstract class GeneratorCommand extends Command
             '{{properties}}' => $properties,
             '{{softDeletesNamespace}}' => $softDeletesNamespace,
             '{{softDeletes}}' => $softDeletes,
+            '{{casts}}' => ($is_id_string)? "'id' => 'string'" : '',
+            '{{incrementing}}' => ($is_id_string)? 'false' : 'true',
+            '{{boot}}' => $boot,
+            '{{uuid}}' => ($is_id_string)? 'use Ramsey\Uuid\Uuid as RamseyUuid;' : '',
         ];
+    }
+
+    /**
+     * Make model attributes/replacements.
+     *
+     * @return array
+     */
+    protected function entityReplacements()
+    {
+        $attributes = "";
+
+        foreach ($this->getColumns() as $value) {
+            $attributes .= "\tprotected $$value->Field";
+
+            if ($value->Default) {
+                $attributes .= $this->transformDefault($value);
+            }
+
+            $attributes .= ";\n";
+        }
+
+        return [
+            '{{entityAttributes}}' => $attributes
+        ];
+    }
+
+    private function transformDefault($value)
+    {
+        $type = $value->Type;
+
+        if($this->isColumnString($type)){
+            return " = '".$value->Default."'";
+        } else {
+            return " = '".$value->Default."'";
+        }
+    }
+
+    private function isColumnString($type)
+    {
+        return !( (strpos($type, 'int') !== false) ||
+        (strpos($type, 'float') !== false) ||
+        (strpos($type, 'decimal') !== false) ||
+        (strpos($type, 'float') !== false) ||
+        (strpos($type, 'numeric') !== false)
+        );
     }
 
     /**

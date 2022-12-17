@@ -1,0 +1,159 @@
+<?php
+
+namespace {{repositoryNamespace}};
+
+use {{modelNamespace}}\{{modelName}};
+use {{entityNamespace}}\{{modelName}}Entity;
+use {{repositoryInterfaceNamespace}}\{{modelName}}RepositoryInterface;
+use {{exceptionRepositoryNamespace}}\{{modelName}}RepositoryException;
+
+/**
+ * Class {{modelName}}Repository
+ * @package {{repositoryNamespace}}
+ */
+class {{modelName}}Repository implements {{modelName}}RepositoryInterface
+{
+    /**
+     * @return {{modelName}}Entity[]
+     * @throws {{modelName}}RepositoryException
+     */
+    public function fetchAll(): array
+    {
+        try {
+            ${{modelNamePluralLowerCase}} = {{modelName}}::all();
+
+            return {{modelName}}Entity::collection(${{modelNamePluralLowerCase}});
+
+        } catch (\Exception $e) {
+            throw new {{modelName}}RepositoryException($e->getMessage());
+        }
+    }
+
+    /**
+     * @param string $id_{{modelNameLowerCase}}
+     * @return {{modelName}}Entity
+     * @throws {{modelName}}RepositoryException
+     */
+    public function fetchById($id_{{modelNameLowerCase}}): {{modelName}}Entity | null
+    {
+        try {
+            $bd_{{modelNameLowerCase}} = {{modelName}}::find($id_{{modelNameLowerCase}});
+            if ($bd_{{modelNameLowerCase}}) {
+                return new {{modelName}}Entity($bd_{{modelNameLowerCase}});
+            }
+            return null;
+        } catch (\Exception $e) {
+            if (!$id_{{modelNameLowerCase}}) {
+                throw new {{modelName}}RepositoryException('No {{modelName}} Identifier was provided.', 'info');
+            }
+            throw new {{modelName}}RepositoryException($e->getMessage());
+        }
+    }
+
+    /**
+     * @param array $filter
+     * @return {{modelName}}Entity[] | null
+     * @throws {{modelName}}RepositoryException
+     */
+     public function fetchBy(array $filter = []): array | null
+    {
+        try {
+            $query = {{modelName}}::select();
+
+            foreach ($filter as $condition) {
+                $query->where($condition['name'], $condition['operator'], $condition['value']);
+            }
+
+            ${{modelNamePluralLowerCase}} = $query->get();
+
+            return {{modelName}}Entity::collection(${{modelNamePluralLowerCase}});
+
+        } catch (\Exception $e) {
+            throw new {{modelName}}RepositoryException($e->getMessage());
+        }
+    }
+
+    /**
+     * @param {{modelName}}Entity ${{modelNameLowerCase}}
+     * @return {{modelName}}Entity
+     * @throws {{modelName}}RepositoryException
+     */
+    public function persist({{modelName}}Entity ${{modelNameLowerCase}}): {{modelName}}Entity
+    {
+        try {
+            $exists = {{modelName}}::find(${{modelNameLowerCase}}->__get('id'));
+
+            if ($exists && ${{modelNameLowerCase}}->__get('id') != 0) {
+                return $this->update(${{modelNameLowerCase}});
+            }
+
+            return $this->store(${{modelNameLowerCase}});
+        } catch (\Exception $e) {
+            throw new {{modelName}}RepositoryException("Couln't persist the {{modelNameLowerCase}}: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * @param {{modelName}}Entity ${{modelNameLowerCase}}
+     * @return {{modelName}}Entity
+     * @throws {{modelName}}RepositoryException
+     */
+    public function store({{modelName}}Entity ${{modelNameLowerCase}}): {{modelName}}Entity
+    {
+        try {
+            //$this->validation(${{modelNameLowerCase}});
+            //request()->validate({{modelName}}::$rules);
+            $bd_{{modelNameLowerCase}} = {{modelName}}::create((array)json_decode(${{modelNameLowerCase}}));
+            return new {{modelName}}Entity($bd_{{modelNameLowerCase}});
+        } catch (\Exception $e) {
+            throw new {{modelName}}RepositoryException("Can't store it -> ".$e->getMessage(), 1);
+        }
+    }
+
+    /**
+     * @param {{modelName}}Entity ${{modelNameLowerCase}}
+     * @return {{modelName}}Entity
+     * @throws {{modelName}}RepositoryException
+     */
+    public function update({{modelName}}Entity ${{modelNameLowerCase}}): {{modelName}}Entity
+    {
+        try {
+            //$this->validation(${{modelNameLowerCase}});
+            //request()->validate({{modelName}}::$rules);
+            $db_{{modelNameLowerCase}} = {{modelName}}::find(${{modelNameLowerCase}}->__get('id'));
+            foreach (${{modelNameLowerCase}}->dehydrate() as $attribute => $value) {
+                if ($value != '' && $db_{{modelNameLowerCase}}->$attribute != $value)
+                    $db_{{modelNameLowerCase}}->$attribute = $value;
+            }
+            $db_{{modelNameLowerCase}}->save();
+            return $this->fetchById(${{modelNameLowerCase}}->__get('id'));
+        } catch (\Exception $e) {
+            throw new {{modelName}}RepositoryException("Can't update it -> ".$e->getMessage(), 1);
+        }
+    }
+
+    /**
+     * @return bool
+     * @throws {{modelName}}RepositoryException
+     */
+     public function delete($id_{{modelNameLowerCase}}): bool
+    {
+        try {
+            if ({{modelName}}::find($id_{{modelNameLowerCase}})->delete()) {
+                return true;
+            }
+            throw new {{modelName}}RepositoryException("{{modelName}} with ID(" . $id_{{modelNameLowerCase}} . ") couldn't be removed");
+        } catch (\Exception $e) {
+            throw new {{modelName}}RepositoryException("Couldn't delete {{modelNameLowerCase}} -> ".$e->getMessage());
+        }
+    }
+
+    /**
+     * @param {{modelName}}Entity ${{modelNameLowerCase}}
+     * @throws {{modelName}}RepositoryException
+     */
+    public function validate({{modelName}}Entity ${{modelNameLowerCase}}): bool
+    {
+        return true;
+    }
+} 

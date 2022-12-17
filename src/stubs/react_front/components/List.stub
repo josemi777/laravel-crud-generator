@@ -1,0 +1,302 @@
+import React, { Component, useEffect, useState, Fragment } from "react";
+import {{modelName}}Service from "../../Services/{{modelName}}Service";
+import Paginator from '@/Components/Paginator';
+import Loader from '@/Components/Loader';
+import { Transition } from "@headlessui/react";
+
+export default class {{modelNamePluralUpperCase}}List extends Component {
+
+    {{modelNameLowerCase}}Options = {{filterArray}}
+
+    constructor(props) {
+        super(props);
+        const params = new URLSearchParams(window.location.search);
+        this.state = {
+            drowpdown: 'hidden',
+            deletedId: null,
+            Search: {
+                name: (params.get("q") != null)? this.{{modelNameLowerCase}}Options[params.get("q")].name : this.{{modelNameLowerCase}}Options[Object.keys(this.{{modelNameLowerCase}}Options)[0]].name,
+                option: (params.get("q") != null)? this.{{modelNameLowerCase}}Options[params.get("q")].code : this.{{modelNameLowerCase}}Options[Object.keys(this.{{modelNameLowerCase}}Options)[0]].code,
+                value: (params.get("v") != null)? params.get("v") : '',
+                placeHolder: 'Search...'
+            },
+            actual_page: (params.get("page") != null)? params.get("page") : 1,
+            filter: (params.get("q") != null)? [{name:params.get("q"), operator:'=', value:params.get("v")}] : null,
+            {{modelNamePluralLowerCase}}: [],
+            pagination: [],
+            {{modelNamePluralLowerCase}}Called: false,
+            message: null
+        };
+    }
+
+    getData()
+    {
+        const thisClass = this
+        thisClass.setState({{{modelNamePluralLowerCase}}Called: false});
+
+        {{modelName}}Service.get{{modelNamePluralUpperCase}}(
+            thisClass.state.actual_page,
+            thisClass.state.filter
+        ).then((res) => {
+
+            if (res['data']['data'].length == 0) {
+                thisClass.setState({ message: (<center><h1 className="text-4xl text-gray-300 font-bold">Sin resultados</h1></center>)})
+            }
+
+            thisClass.setState({
+                    {{modelNamePluralLowerCase}}Called: true,
+                    {{modelNamePluralLowerCase}}: res['data']['data'],
+                    pagination: {
+                        actual : (res['data']['pagination']['actual_page'] !== 'undefined') ? res['data']['pagination']['actual_page'] : 0,
+                        per_page : (res['data']['pagination']['items_per_page'] !== 'undefined') ? res['data']['pagination']['items_per_page'] : 0,
+                        total : (res['data']['pagination']['total'] !== 'undefined') ? res['data']['pagination']['total'] : 0
+                }
+            });
+        }).catch(function (error) {
+            thisClass.setState({
+                {{modelNamePluralLowerCase}}Called: true,
+                message : (<center><h1 className="text-4xl text-red-500 font-bold">Error</h1></center>)
+            })
+        });
+    }
+
+    componentDidMount()
+    {
+        this.getData();
+    }
+
+    toggleDropDown = () =>
+    {
+        this.setState({ drowpdown: "show"});
+    }
+
+    goToPageCallback = (page) =>
+    {
+        this.setState({actual_page: page}, () => {
+            this.getData();
+            this.headerChanger();
+        });
+    }
+
+    setFilter = (name, option) =>
+    {
+        this.setState({
+            drowpdown: "hidden",
+            Search: {
+                name: name,
+                option: option,
+            }
+        });
+    }
+
+    headerChanger()
+    {
+        let url = ''
+        if (this.state.actual_page != 1) {
+            url = url + 'page='+this.state.actual_page
+        }
+
+        if (this.state.filter != null) {
+            const urlfilter = 'q='+this.state.filter[0]['name']+'&v='+this.state.filter[0]['value']
+            url = (url != '')? url+'&'+urlfilter : urlfilter;
+        }
+        
+        url = (url != '')? '?'+url : url;
+
+        history.pushState(null, "", window.location.pathname+url);
+    }
+
+    onSubmitSearchHandler = (event) =>
+    {
+        event.preventDefault();
+        const form = new FormData(event.target);
+        const filter = (form.get('value') != '' && form.get('value') != null)? [{name:form.get('option'), operator: "=", value:form.get('value')}] : null;
+        
+        this.setState({
+            actual_page: 1,
+            filter: filter
+        }, () => {
+            this.getData();
+            this.headerChanger();
+        });
+    }
+
+    edit{{modelName}}({{modelNameLowerCase}}_id)
+    {
+        window.location = route('{{modelNameLowerCase}}.manage.edit', {{modelNameLowerCase}}_id);
+    }
+
+    delete{{modelName}}(event, {{modelNameLowerCase}}_id)
+    {
+        this.setState({deletedId: {{modelNameLowerCase}}_id});
+
+        {{modelName}}Service.delete{{modelName}}(
+            {{modelNameLowerCase}}_id
+        ).then((res) => {
+            this.setState({
+                deletedId: null,
+                {{modelNamePluralLowerCase}}: this.state.{{modelNamePluralLowerCase}}.filter((e) => e.id != {{modelNameLowerCase}}_id),
+            });
+        });
+    }
+
+   
+    render() {
+
+        return (
+            <div className="flex flex-col">
+                <div className="-my-2">
+                    <div className="py-2 align-middle block min-w-full sm:px-6 lg:px-8">
+                        <div className="lg:flex lg:items-center lg:justify-between py-2 mb-5 w-full">
+                            <div className="w-5/12">
+                                <div className="flex">
+                                    <label
+                                        htmlFor="search-dropdown"
+                                        className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white"
+                                    >
+                                        Search
+                                    </label>
+                                    <button
+                                        id="dropdownSearch"
+                                        data-dropdown-toggle="dropdown"
+                                        onClick={this.toggleDropDown}
+                                        className="flex-shrink-0 z-10 inline-flex items-center px-4 py-2 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-gray-300 rounded-l-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100"
+                                        type="button"
+                                    >
+                                        {this.state.Search.name}
+                                        <svg
+                                            aria-hidden="true"
+                                            className="w-4 h-4 ml-1"
+                                            fill="currentColor"
+                                            viewBox="0 0 20 20"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                            <path
+                                                fillRule="evenodd"
+                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                clipRule="evenodd"
+                                            ></path>
+                                        </svg>
+                                    </button>
+                                    <div
+                                        id="dropdown"
+                                        className={this.state.drowpdown+" z-10 absolute bg-gray-600 divide-y divide-gray-100 rounded shadow w-44"}
+                                        data-popper-reference-hidden=""
+                                        data-popper-escaped=""
+                                        data-popper-placement="bottom"
+                                    >
+                                        <ul
+                                            className="py-1 text-sm text-gray-100 dark:text-gray-200"
+                                            aria-labelledby="dropdownSearch"
+                                        >
+                                            {{filter}}
+                                        </ul>
+                                    </div>
+                                    <div className="relative w-full">
+                                        <form onSubmit={this.onSubmitSearchHandler}>
+                                            <input
+                                                type="search"
+                                                id="search-dropdown"
+                                                name="value"
+                                                className="block px-4 py-2 w-full z-20 text-sm text-gray-900 bg-gray-50 rounded-r-lg border-l-gray-50 border-l-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                                                placeholder={this.state.Search.placeHolder}
+                                                defaultValue={this.state.Search.value}
+                                            />
+                                            <input
+                                                type="hidden"
+                                                name="option"
+                                                defaultValue={this.state.Search.option}
+                                            />
+                                            <button
+                                                type="submit"
+                                                className="absolute top-0 right-0 px-4 !h-full text-sm font-medium text-white bg-gray-500 rounded-r-lg border border-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-blue-300"
+                                            >
+                                                <svg aria-hidden="true" className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                                </svg>
+                                                <span className="sr-only">Search</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mt-5 flex lg:mt-0 lg:ml-4">
+                                <span className="hidden sm:block">
+                                    <a href="/{{modelNameLowerCase}}/create">
+                                        <button
+                                            type="button"
+                                            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                        >
+                                            <svg
+                                                className="-ml-1 mr-2 h-5 w-5 text-gray-500"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
+                                                aria-hidden="true"
+                                            >
+                                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                            </svg>
+                                            CREATE
+                                        </button>
+                                    </a>
+                                </span>
+                            </div>
+                        </div>
+                        { !this.state.{{modelNamePluralLowerCase}}Called && <Loader />}
+                        { this.state.{{modelNamePluralLowerCase}}Called && this.state.message != null && this.state.message }
+                        { this.state.{{modelNamePluralLowerCase}}Called && this.state.{{modelNamePluralLowerCase}}.length > 0 && (
+
+                                <React.Fragment>
+                                <div className="!overflow-x-auto border transition delay-150 duration-300 border-gray-200 sm:rounded-lg mb-6">
+                                    <table className="min-w-full text-center">
+                                        <thead className="border-b bg-gray-800">
+                                            <tr>{{tableHead}}
+                                                <th
+                                                    scope="col"
+                                                    className="text-sm font-medium text-white px-6 py-2"
+                                                >
+                                                    <span className="sr-only">Edit</span>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {this.state.{{modelNamePluralLowerCase}}.map(({{modelNameLowerCase}}) => (
+                                                <tr
+                                                    key={{{modelNameLowerCase}}.id}
+                                                    className="bg-white border-b transition-all duration-1000 hover:bg-gray-100 cursor-pointer"
+                                                >{{tableBody}}
+                                                    <td className="px-1 py-4 space-x-2 whitespace-nowrap text-right text-sm font-medium">
+                                                        {
+                                                            !(this.state.deletedId==={{modelNameLowerCase}}.id) &&
+                                                            <React.Fragment>
+                                                                <button type="button" onClick={() => this.edit{{modelName}}({{modelNameLowerCase}}.id)} className="inline-block text-sm px-1 py-1 leading-none rounded text-blue-600 hover:bg-blue-600 hover:text-white mt-4 lg:mt-0">
+                                                                    <svg aria-hidden="true" className="w-4 h-4" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M471.6 21.7c-21.9-21.9-57.3-21.9-79.2 0L362.3 51.7l97.9 97.9 30.1-30.1c21.9-21.9 21.9-57.3 0-79.2L471.6 21.7zm-299.2 220c-6.1 6.1-10.8 13.6-13.5 21.9l-29.6 88.8c-2.9 8.6-.6 18.1 5.8 24.6s15.9 8.7 24.6 5.8l88.8-29.6c8.2-2.8 15.7-7.4 21.9-13.5L437.7 172.3 339.7 74.3 172.4 241.7zM96 64C43 64 0 107 0 160V416c0 53 43 96 96 96H352c53 0 96-43 96-96V320c0-17.7-14.3-32-32-32s-32 14.3-32 32v96c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h96c17.7 0 32-14.3 32-32s-14.3-32-32-32H96z"/></svg>
+                                                                </button>
+                                                                <button type="button" onClick={(e) => this.delete{{modelName}}(e, {{modelNameLowerCase}}.id)} className="inline-block text-sm px-1 py-1 leading-none rounded text-red-600 hover:bg-red-600 hover:text-white lg:mt-0 !mr-2">
+                                                                    <svg aria-hidden="true" className="w-4 h-4" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z"/></svg>
+                                                                </button>
+                                                            </React.Fragment>
+                                                        }
+                                                        {
+                                                            this.state.deletedId==={{modelNameLowerCase}}.id && <Loader size="6" />
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <Paginator
+                                    callbackPage={this.goToPageCallback}
+                                    page={this.state.pagination.actual}
+                                    per_page={this.state.pagination.per_page}
+                                    total_items={this.state.pagination.total}
+                                />
+                                </React.Fragment>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+}

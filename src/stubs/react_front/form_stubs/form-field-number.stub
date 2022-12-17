@@ -1,0 +1,9 @@
+        <div className="mb-5">
+            <InputLabel value="{{title}}:"/>
+            <TextInput
+                type="number"
+                name="{{column}}"
+                handleChange={this.handleInputChange}
+                value={this.state.{{modelNameLowerCase}}.{{column}}}
+            />
+        </div>

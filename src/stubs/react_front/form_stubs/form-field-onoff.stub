@@ -1,0 +1,13 @@
+        <div className="mb-5">
+            <InputLabel value="{{title}}:"/>
+                <div className="flex flex-col items-start">
+                    <input
+                        type="checkbox"
+                        checked={this.state.{{modelNameLowerCase}}.{{column}}}
+                        value={this.state.{{modelNameLowerCase}}.{{column}}}
+                        name="{{column}}"
+                        className="border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm"
+                        onChange={(e) => this.handleInputChange(e)}
+                    />
+                </div>
+        </div>

@@ -1,0 +1,71 @@
+import React, { Component, useEffect, useState } from "react";
+
+export default class Paginator extends Component {
+
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            page: props.page,
+            total_pages: props.total_items/props.per_page,
+            per_page: props.per_page,
+            total: props.total_items,
+            is_first_page: (props.page <= 1),
+            is_last_page: (props.page >= (props.total_items/props.per_page)),
+            callbackPage: props.callbackPage
+        };
+    }
+
+    goToPage(page)
+    {
+        if (typeof this.state.callbackPage !== 'undefined') {
+            this.state.callbackPage(page)
+        } else {
+            window.location.href = window.location.pathname+'?page='+page
+        }
+    }
+
+    render() {
+
+        const pages = []
+        const nextPage =  Number(this.state.page)+1
+        const prevPage = this.state.page-1
+
+        var first_class = (!this.state.is_first_page)? "" : " rounded-l-lg ";
+        var last_class = (!this.state.is_last_page)? "" : " rounded-r-lg ";
+
+        for (let i = 0; i < this.state.total_pages; i++) {
+            let extraClass = (i == 0 && first_class)? first_class : '';
+            extraClass = (i >= this.state.total_pages-1 && last_class)? last_class : extraClass;
+            if (i == this.state.page-1) {
+                extraClass += " !bg-gray-700 !text-white  "
+            }
+            pages.push(<li><button type="button" onClick={() => this.goToPage(i+1)} className={extraClass+ "px-3 py-2 inline-flex leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"}>{i+1}</button></li>)
+        }
+
+        return (
+            !(this.state.page != 0) || 
+                <nav aria-label="Page navigation">
+                    <ul className="inline-flex -space-x-px">
+                        {this.state.is_first_page ||
+                            <li>
+                                <button type="button" onClick={() => this.goToPage(prevPage)} className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                                    <svg aria-hidden="true" className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M7.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l2.293 2.293a1 1 0 010 1.414z" clipRule="evenodd"></path></svg>
+                                    Previous
+                                </button>
+                            </li>
+                        }
+                        { (this.state.total_pages <=1 ) || pages}
+                        {this.state.is_last_page ||
+                            <li>
+                                <button type="button" onClick={() => this.goToPage(nextPage)} className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                                    Next
+                                    <svg aria-hidden="true" className="w-5 h-5 ml-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>
+                                </button>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+        );
+    }
+}

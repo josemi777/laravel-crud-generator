@@ -1,0 +1,35 @@
+import axios from 'axios';
+
+const API_BASE_URL = "/api/{{modelNameLowerCase}}";
+
+class {{modelName}}Service {
+
+    get{{modelNamePluralUpperCase}}(page = null, filter = null){
+        return axios.get(API_BASE_URL + '/get', {'params':{'page': page, 'filter': filter}});
+    }
+
+    create{{modelName}}({{modelNameLowerCase}}){
+        return axios.post(API_BASE_URL + '/create', {{modelNameLowerCase}}, {
+            headers: {
+                'Content-Type': `multipart/form-data; boundary=${{{modelNameLowerCase}}._boundary}`
+            },});
+    }
+
+    get{{modelName}}ById({{modelNameLowerCase}}Id){
+        return axios.get(API_BASE_URL + '/get', {'params':{'id': {{modelNameLowerCase}}Id}});
+    }
+
+    update{{modelName}}({{modelNameLowerCase}}){
+        {{modelNameLowerCase}}.append("_method","PUT");
+        return axios.post(API_BASE_URL + '/update',  {{modelNameLowerCase}}, {
+            headers: {
+                'Content-Type': `multipart/form-data; boundary=${{{modelNameLowerCase}}._boundary}`,
+            },});
+    }
+
+    delete{{modelName}}({{modelNameLowerCase}}Id){
+        return axios.delete(API_BASE_URL + '/delete', {'data':{'id': {{modelNameLowerCase}}Id}});
+    }
+}
+
+export default new {{modelName}}Service()

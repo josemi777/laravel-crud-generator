@@ -1,0 +1,34 @@
+<?php
+
+namespace {{usecaseNamespace}};
+
+use Illuminate\Http\Request;
+use {{entityNamespace}}\{{modelName}}Entity;
+use {{repositoryInterfaceNamespace}}\{{modelName}}RepositoryInterface;
+
+class Create{{modelName}}UseCase
+{
+    /** @var {{modelName}}RepositoryInterface ${{modelNameLowerCase}}Repository */
+    private {{modelName}}RepositoryInterface ${{modelNameLowerCase}}Repository;
+
+    /**
+     * @param Injections
+     */
+    public function __construct(
+        {{modelName}}RepositoryInterface ${{modelNameLowerCase}}Repostiroy,
+    ) {
+        $this->{{modelNameLowerCase}}Repository = ${{modelNameLowerCase}}Repostiroy;
+    }
+
+    /** 
+     * @param Request $request
+     * @return bool
+     */
+    public function execute(Request $request)
+    {
+        ${{modelNameLowerCase}} = new {{modelName}}Entity($request->all());
+        ${{modelNameLowerCase}} = $this->{{modelNameLowerCase}}Repository->persist(${{modelNameLowerCase}});
+
+        return true;
+    }
+}

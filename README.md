@@ -10,6 +10,10 @@ This Laravel Generator package provides and generate Controller, Model (with elo
 
 - Will create **Model** with Eloquent relations
 - Will create **Controller** with all resources
+- Will create **DDD/Hexagonal** Architecture
+- Will create **UseCases**
+- Will create **Repositories** with interface and custom exception
+- Will create **Entities**
 - Will create **views** in Bootstrap
 
 ## Requirements
@@ -19,7 +23,7 @@ This Laravel Generator package provides and generate Controller, Model (with elo
 ## Installation
 1 - Install
 ```
-composer require ibex/crud-generator --dev
+composer require jmsr/crud-generator-laravel --dev
 ```
 2- Publish the default package's config
 ```

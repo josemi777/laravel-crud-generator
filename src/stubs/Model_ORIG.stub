@@ -2,9 +2,7 @@
 
 namespace {{modelNamespace}};
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-{{uuid}}
 {{softDeletesNamespace}}
 /**
  * Class {{modelName}}
@@ -14,15 +12,11 @@ use Illuminate\Database\Eloquent\Model;
  */
 class {{modelName}} extends Model
 {
-    use HasFactory;
-
     {{softDeletes}}
-    static $rules = [{{rules}}];
+    static $rules = [{{rules}}
+    ];
 
     protected $perPage = 20;
-
-    protected $casts = [{{casts}}];
-    public $incrementing = {{incrementing}};
 
     /**
      * Attributes that should be mass-assignable.
@@ -30,8 +24,6 @@ class {{modelName}} extends Model
      * @var array
      */
     protected $fillable = [{{fillable}}];
-
-    {{boot}}
 
 {{relations}}
 

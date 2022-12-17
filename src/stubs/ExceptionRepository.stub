@@ -1,0 +1,7 @@
+<?php
+
+namespace {{exceptionRepositoryNamespace}};
+
+class {{modelName}}RepositoryException extends \Exception
+{
+}

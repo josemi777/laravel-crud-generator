@@ -1,0 +1,9 @@
+<li>
+    <button
+        onClick={() => this.setFilter("{{title}}", "{{column}}")}
+        type="button"
+        className="inline-flex w-full px-4 py-2 hover:bg-gray-100 hover:text-gray-600 dark:bg-gray-600 dark:text-white"
+    >
+        {{title}}
+    </button>
+</li>

@@ -1,0 +1,66 @@
+<?php
+
+namespace {{repositoryInterfaceNamespace}};
+
+use {{entityNamespace}}\{{modelName}}Entity;
+use {{exceptionRepositoryNamespace}}\{{modelName}}RepositoryException;
+
+/**
+ * Class {{modelName}}RepositoryInterface
+ * @package {{repositoryInterfaceNamespace}}
+ */
+interface {{modelName}}RepositoryInterface
+{
+    /**
+     * @return {{modelName}}Entity[]
+     * @throws {{modelName}}RepositoryException
+     */
+    public function fetchAll(): array;
+
+    /**
+     * @param string $id_{{modelNameLowerCase}}
+     * @return {{modelName}}Entity
+     * @throws {{modelName}}RepositoryException
+     */
+    public function fetchById(int $id_{{modelNameLowerCase}}): {{modelName}}Entity | null;
+
+    /**
+     * @param array $filter
+     * @return {{modelName}}Entity[]
+     * @throws {{modelName}}RepositoryException
+     */
+    public function fetchBy(array $filter = []): array | null;
+
+    /**
+     * @param {{modelName}}Entity ${{modelNameLowerCase}}
+     * @return {{modelName}}Entity
+     * @throws {{modelName}}RepositoryException
+     */
+    public function persist({{modelName}}Entity ${{modelNameLowerCase}}): {{modelName}}Entity;
+
+    /**
+     * @param {{modelName}}Entity ${{modelNameLowerCase}}
+     * @return {{modelName}}Entity
+     * @throws {{modelName}}RepositoryException
+     */
+    public function store({{modelName}}Entity ${{modelNameLowerCase}}): {{modelName}}Entity;
+
+    /**
+     * @param {{modelName}}Entity ${{modelNameLowerCase}}
+     * @return {{modelName}}Entity
+     * @throws {{modelName}}RepositoryException
+     */
+    public function update({{modelName}}Entity ${{modelNameLowerCase}}): {{modelName}}Entity;
+
+    /**
+     * @return bool
+     * @throws {{modelName}}RepositoryException
+     */
+     public function delete(int $id_{{modelNameLowerCase}}): bool;
+
+    /**
+     * @param {{modelName}}Entity ${{modelNameLowerCase}}
+     * @throws {{modelName}}RepositoryException
+     */
+    public function validate({{modelName}}Entity ${{modelNameLowerCase}}): bool;
+} 

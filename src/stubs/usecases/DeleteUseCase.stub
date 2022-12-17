@@ -1,0 +1,30 @@
+<?php
+
+namespace {{usecaseNamespace}};
+
+use Illuminate\Http\Request;
+use {{entityNamespace}}\{{modelName}}Entity;
+use {{repositoryInterfaceNamespace}}\{{modelName}}RepositoryInterface;
+
+class Delete{{modelName}}UseCase
+{
+    private {{modelName}}RepositoryInterface ${{modelNameLowerCase}}Repository;
+
+    /**
+     * @param Injections
+     */
+    public function __construct(
+        {{modelName}}RepositoryInterface ${{modelNameLowerCase}}Repostiroy,
+    ) {
+        $this->{{modelNameLowerCase}}Repository = ${{modelNameLowerCase}}Repostiroy;
+    }
+
+    /** 
+     * @param Request $request
+     * @return bool
+     */
+    public function execute(Request $request)
+    {
+        return $this->{{modelNameLowerCase}}Repository->delete($request->id);
+    }
+}

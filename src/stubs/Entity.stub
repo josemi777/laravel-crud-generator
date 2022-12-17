@@ -1,0 +1,22 @@
+<?php
+
+namespace {{entityNamespace}};
+
+use Src\Domain\Entity\BaseEntity;
+
+class {{modelName}}Entity extends BaseEntity
+{
+{{entityAttributes}}
+
+    static public function collection($data)
+    {
+        $collection = [];
+        
+        foreach ($data as $entity_data) {
+                $entity =  new self($entity_data);
+                $collection []= $entity->dehydrate();
+            }
+        
+        return $collection;
+    }
+}

@@ -2,108 +2,112 @@
 
 namespace {{controllerNamespace}};
 
-use {{modelNamespace}}\{{modelName}};
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
+use {{usecaseNamespace}}\Create{{modelName}}UseCase;
+use {{usecaseNamespace}}\Delete{{modelName}}UseCase;
+use {{usecaseNamespace}}\Get{{modelName}}UseCase;
+use {{usecaseNamespace}}\Update{{modelName}}UseCase;
+use {{exceptionRepositoryNamespace}}\{{modelName}}RepositoryException;
 
-/**
- * Class {{modelName}}Controller
- * @package App\Http\Controllers
- */
 class {{modelName}}Controller extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Create a new controller instance.
      *
-     * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
-        ${{modelNamePluralLowerCase}} = {{modelName}}::paginate();
-
-        return view('{{modelView}}.index', compact('{{modelNamePluralLowerCase}}'))
-            ->with('i', (request()->input('page', 1) - 1) * ${{modelNamePluralLowerCase}}->perPage());
+    public function __construct(
+        private Create{{modelName}}UseCase $create{{modelName}}UseCase,
+        private Update{{modelName}}UseCase $update{{modelName}}UseCase,
+        private Delete{{modelName}}UseCase $delete{{modelName}}UseCase,
+        private Get{{modelName}}UseCase $get{{modelName}}UseCase
+    ){
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    public function createAction(Request $request)
     {
-        ${{modelNameLowerCase}} = new {{modelName}}();
-        return view('{{modelView}}.create', compact('{{modelNameLowerCase}}'));
+        try {
+            ${{modelNameLowerCase}}_created = $this->create{{modelName}}UseCase->execute($request);
+            return response(${{modelNameLowerCase}}_created, Response::HTTP_CREATED)->header('Content-Type', 'application/json');
+
+        } catch ({{modelName}}RepositoryException $e) {
+            $message = (env("APP_DEBUG") == true) ? $e->getMessage(): '';
+            return response()->json(['Error' => '{{modelName}}Error', 'message' => $message], Response::HTTP_BAD_REQUEST);
+        }catch(\Exception $e) {
+            $message = (env("APP_DEBUG") == true) ? $e->getMessage(): '';
+            Log::error($e->getMessage());
+            return response('Ups! algo no salio como esperábamos, sorry.'.$message, Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function updateAction()
     {
-        request()->validate({{modelName}}::$rules);
+        try {
 
-        ${{modelNameLowerCase}} = {{modelName}}::create($request->all());
+            ${{modelNameLowerCase}}_updated = $this->update{{modelName}}UseCase->execute(request());
+            return response(${{modelNameLowerCase}}_updated, Response::HTTP_OK)->header('Content-Type', 'application/json');
 
-        return redirect()->route('{{modelRoute}}.index')
-            ->with('success', '{{modelName}} created successfully.');
+        } catch ({{modelName}}RepositoryException $e) {
+            $message = (env("APP_DEBUG") == true) ? $e->getMessage(): '';
+            return response()->json(['Error' => '{{modelName}}Error', 'message' => $message], Response::HTTP_BAD_REQUEST);
+        }catch(\Exception $e) {
+            $message = (env("APP_DEBUG") == true) ? $e->getMessage(): '';
+            Log::error($e->getMessage());
+            return response('Ups! algo no salio como esperábamos, sorry.'.$message, Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function deleteAction()
     {
-        ${{modelNameLowerCase}} = {{modelName}}::find($id);
+        try {
 
-        return view('{{modelView}}.show', compact('{{modelNameLowerCase}}'));
+            if (request()->has('id')) {
+                $response =  $this->delete{{modelName}}UseCase->execute(request());
+                return response($response, Response::HTTP_OK)->header('Content-Type', 'application/json');
+            }
+            throw new {{modelName}}RepositoryException('Invalid params');
+
+        } catch ({{modelName}}RepositoryException $e) {
+            $message = (env("APP_DEBUG") == true) ? $e->getMessage(): '';
+            return response()->json(['Error' => '{{modelName}}Error', 'message' => $message], Response::HTTP_BAD_REQUEST);
+        }catch(\Exception $e) {
+            $message = (env("APP_DEBUG") == true) ? $e->getMessage(): '';
+            Log::error($e->getMessage());
+            return response('Ups! algo no salio como esperábamos, sorry.'.$message, Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
+    public function getAction()
     {
-        ${{modelNameLowerCase}} = {{modelName}}::find($id);
+        try {
+            $response = [];
+            $response['pagination'] = [];
+            $response['data'] = (${{modelNameLowerCase}} = $this->get{{modelName}}UseCase->execute(request()))? ${{modelNameLowerCase}} : [];
 
-        return view('{{modelView}}.edit', compact('{{modelNameLowerCase}}'));
-    }
+            if (request()->has('page')) {
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @param  {{modelName}} ${{modelNameLowerCase}}
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, {{modelName}} ${{modelNameLowerCase}})
-    {
-        request()->validate({{modelName}}::$rules);
+                $page = request()->page;
+                $limit = env('ITEMS_PER_PAGE');
+                $offset = ($page-1) * $limit;
 
-        ${{modelNameLowerCase}}->update($request->all());
+                $response['pagination'] = [
+                    'total' => count($response['data']),
+                    'items_per_page' => $limit,
+                    'actual_page' => $page
+                ];
+                $response['data'] = array_slice($response['data'], $offset, $limit);
+            }
 
-        return redirect()->route('{{modelRoute}}.index')
-            ->with('success', '{{modelName}} updated successfully');
-    }
+            return response($response, Response::HTTP_OK)->header('Content-Type', 'application/json');
 
-    /**
-     * @param int $id
-     * @return \Illuminate\Http\RedirectResponse
-     * @throws \Exception
-     */
-    public function destroy($id)
-    {
-        ${{modelNameLowerCase}} = {{modelName}}::find($id)->delete();
-
-        return redirect()->route('{{modelRoute}}.index')
-            ->with('success', '{{modelName}} deleted successfully');
+        } catch ({{modelName}}RepositoryException $e) {
+            $message = (env("APP_DEBUG") == true) ? $e->getMessage(): '';
+            return response()->json(['Error' => '{{modelName}}Error', 'message' => $message], Response::HTTP_BAD_REQUEST);
+        }catch(\Exception $e) {
+            $message = (env("APP_DEBUG") == true) ? $e->getMessage(): '';
+            Log::error($e->getMessage());
+            return response('Ups! algo no salio como esperábamos, sorry.'.$message, Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

@@ -30,6 +30,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Architecture mode
+    |--------------------------------------------------------------------------
+    |
+    | Select the mode in wich your project architecture will be diposed
+    |
+    | Default: "default"
+    | Options:
+    |       "default"
+    |       "ddd"
+    |       "hexagonal"
+    */
+
+    'architecture_mode' => 'default',
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Layout
     |--------------------------------------------------------------------------
     |
@@ -39,6 +55,24 @@ return [
     */
 
     'layout' => 'layouts.app',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Front Framework
+    |--------------------------------------------------------------------------
+    |
+    | You can choose wich framework will be use for the crud, default of Laravel or
+    | React
+    |
+    | Default: "default"
+    | Options:
+    |       "default"
+    |       "react"
+    |
+    */
+
+    'front' => 'reac',
+
 
     'model' => [
         'namespace' => 'App\Models',
@@ -59,6 +93,10 @@ return [
 
     'controller' => [
         'namespace' => 'App\Http\Controllers',
+    ],
+
+    'src' => [
+        'namespace' => 'Src',
     ],
 
 ];
