@@ -1,0 +1,52 @@
+<?php
+
+namespace Src\Domain\Entity;
+
+class BaseEntity
+{
+    public function __construct($data)
+    {
+        $this->hydrate($data);
+    }
+
+    public function __set($name, $value)
+    {
+        $this->$name = $value;
+    }
+
+    public function __get($name)
+    {
+        return $this->$name;
+    }
+
+    /**
+     * @return array
+     */
+    public function dehydrate()
+    {
+        return get_object_vars($this);
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return json_encode($this->dehydrate());
+    }
+
+    /**
+     * @return void
+     */
+    public function hydrate($data)
+    {
+        if ($data != null) {
+            $data = (!is_array($data)) ? json_decode($data) : json_decode(json_encode($data));
+            foreach ($data as $key => $value) {
+                if (property_exists($this, $key)) {
+                    $this->$key = $value;
+                }
+            }
+        }
+    }
+}

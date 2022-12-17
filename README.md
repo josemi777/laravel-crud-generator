@@ -1,4 +1,4 @@
-![Laravel Crud Generator](https://banners.beyondco.de/Laravel%20CRUD.png?theme=dark&packageManager=composer+require&packageName=ibex%2Fcrud-generator&pattern=architect&style=style_1&description=Laravel+CRUD+Generator&md=1&showWatermark=0&fontSize=100px&images=gift)
+![Laravel Crud Generator](https://josemisr.com/images/Laravel%20CRUD.png)
 
 
 ![Packagist](https://img.shields.io/badge/Packagist-v1.3.2-green.svg?style=flat-square)
@@ -14,11 +14,12 @@ This Laravel Generator package provides and generate Controller, Model (with elo
 - Will create **UseCases**
 - Will create **Repositories** with interface and custom exception
 - Will create **Entities**
-- Will create **views** in Bootstrap
+- Will create **views** in Bootstrap or React, yo can choose it in config file
+- Will create **Bindings** Routes web and api, and autowiring on AppProvider file
 
 ## Requirements
-    Laravel >= 5.5
-    PHP >= 7.1
+    Laravel >= 8.0
+    PHP >= 8.1
 
 ## Installation
 1 - Install
@@ -68,9 +69,5 @@ php artisan make:crud {table_name} --route={route_name}
 
 
 ## Author
-
-M Awais // [Email Me](mailto:asargodha@gmail.com)
-
-[Buy me a Coffee](https://ko-fi.com/C0C8VT1M)
 
 [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C8VT1M)
