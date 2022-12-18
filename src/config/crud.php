@@ -71,7 +71,7 @@ return [
     |
     */
 
-    'front' => 'reac',
+    'front' => 'default',
 
 
     'model' => [

@@ -1,4 +1,4 @@
-![Laravel Crud Generator](https://josemisr.com/images/Laravel%20CRUD.png)
+![Laravel Crud Generator](https://josemisr.com/images/Laravel%20CRUD%20ddd%20and%20react.png)
 
 
 ![Packagist](https://img.shields.io/badge/Packagist-v1.3.2-green.svg?style=flat-square)
@@ -6,16 +6,16 @@
 ![StyleCI](https://img.shields.io/badge/StyleCI-pass-green.svg?style=flat-square)
 
 
-This Laravel Generator package provides and generate Controller, Model (with eloquent relations) and Views in **Bootstrap** for your development of your applications with single command.
+This Laravel Generator package provides and generate Controller, Model (with eloquent relations) and Views in **Bootstrap** or **React** and by **DDD** architecture, if you want, for your development of your applications with single command.
 
 - Will create **Model** with Eloquent relations
 - Will create **Controller** with all resources
 - Will create **DDD/Hexagonal** Architecture
 - Will create **UseCases**
-- Will create **Repositories** with interface and custom exception
+- Will create **Repositories** with **Interface** and custom **Exception**
 - Will create **Entities**
-- Will create **views** in Bootstrap or React, yo can choose it in config file
-- Will create **Bindings** Routes web and api, and autowiring on AppProvider file
+- Will create **views** in `Bootstrap` or `React`, yo can choose it in config file
+- Will create **Bindings** Routes web and api, and autowiring on `AppProvider` file
 
 ## Requirements
     Laravel >= 8.0
@@ -32,6 +32,7 @@ php artisan vendor:publish --tag=crud
 ```
 
 ## Usage
+
 ```
 php artisan make:crud {table_name}
 
@@ -50,24 +51,23 @@ Route name in plural slug case.
 php artisan make:crud {table_name} --route={route_name}
 ```
 
-## Example
+#### Options
 
-*Model*
-![Model](https://i.imgur.com/zTSoYvJ.png)
+### - Bootstrap -
 
+In this case you don't need to change anything y confi file.
 
-*Controller*
-![Controller](https://i.imgur.com/G1ytmcL.png)
+ - Custom Route
+```
+php artisan make:crud {table_name} --route={route_name}
 
+```
+### - React -
 
-*Listing*
-![Listing](https://i.imgur.com/UH5XGuw.png)
+You need to change config file `architecture_mode` to *ddd* and `front` to *react*
 
+ - Do everything under context
 
-*Form*
-![Form](https://i.imgur.com/poRiZRO.png)
-
-
-## Author
-
-[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C8VT1M)
+```
+php artisan make:crud {table_name} --path={context_name}
+```

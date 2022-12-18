@@ -26,7 +26,7 @@ class CrudGenerator extends GeneratorCommand
      *
      * @var string
      */
-    protected $description = 'Create bootstrap CRUD operations';
+    protected $description = 'Create bootstrap or react CRUD operations';
 
     protected $architectureMode = 'default';
 
@@ -58,8 +58,8 @@ class CrudGenerator extends GeneratorCommand
         // Generate the crud
         $this->buildOptions()
             ->buildElements()
-            ->buildViews()
-            ->buildWiring();
+            ->buildWiring()
+            ->buildViews();
 
         $this->info('Created Successfully.');
 
@@ -158,6 +158,8 @@ class CrudGenerator extends GeneratorCommand
         
         $new_content = str_replace($matches[0], str_replace($matches[2],  $matches[2]."\n\t\t".$bindings['controller_bind']."\n\t\t".$bindings['repository_bind']."\n\t", $matches[0]), $content);
         file_put_contents("./app/Providers/AppServiceProvider.php", $new_content);
+
+        return $this;
         
     }
 
