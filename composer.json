@@ -1,14 +1,14 @@
 {
     "name": "jmsr/crud-generator-laravel",
-    "description": "Laravel Crud Generator",
+    "description": "Laravel Crud Generator. This Laravel Generator package provides and generate Controller, Model (with eloquent relations) and Views in **Bootstrap** or **React** and by **DDD** architecture, if you want, for your development of your applications with single command.",
     "license": "MIT",
     "authors": [
         {
-            "name": "José Miguel",
+            "name": "José Miguel Sánchez",
             "email": "me@josemisr.com"
         }
     ],
-    "keywords": ["laravel", "crud", "crud generator", "laravel crud generator", "laravel package"],
+    "keywords": ["laravel", "crud", "crud generator", "laravel crud generator", "laravel package", "react", "react crud", "ddd", "laravel ddd"],
     "require": {
         "laravel/framework": "^5.5|^6.20.42|^7.0|^8.0|^9.0",
         "laravelcollective/html": "^5.4|^6.0|^7.0|^8.0"
