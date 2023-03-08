@@ -5,13 +5,15 @@ export default class Paginator extends Component {
     constructor(props) {
         super(props);
 
+        const perpage_c = (props.per_page == 'undefined' || props.per_page == 0 || props.per_page == null)? 1 : props.per_page
+
         this.state = {
             page: props.page,
-            total_pages: props.total_items/props.per_page,
-            per_page: props.per_page,
+            total_pages: props.total_items/perpage_c,
+            per_page: perpage_c,
             total: props.total_items,
             is_first_page: (props.page <= 1),
-            is_last_page: (props.page >= (props.total_items/props.per_page)),
+            is_last_page: (props.page >= (props.total_items/perpage_c)),
             callbackPage: props.callbackPage
         };
     }

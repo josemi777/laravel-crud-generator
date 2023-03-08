@@ -40,7 +40,7 @@ export default class {{modelNamePluralUpperCase}}List extends Component {
         ).then((res) => {
 
             if (res['data']['data'].length == 0) {
-                thisClass.setState({ message: (<center><h1 className="text-4xl text-gray-300 font-bold">Sin resultados</h1></center>)})
+                thisClass.setState({ message: (<center><h1 className="text-4xl text-gray-300 font-bold">No results</h1></center>)})
             }
 
             thisClass.setState({

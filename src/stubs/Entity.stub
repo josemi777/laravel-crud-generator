@@ -2,7 +2,7 @@
 
 namespace {{entityNamespace}};
 
-use Src\Domain\Entity\BaseEntity;
+use Src\BaseEntity;
 
 class {{modelName}}Entity extends BaseEntity
 {

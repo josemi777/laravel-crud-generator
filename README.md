@@ -22,52 +22,57 @@ This Laravel Generator package provides and generate Controller, Model (with elo
     PHP >= 8.1
 
 ## Installation
-1 - Install
-```
-composer require jmsr/crud-generator-laravel --dev
-```
-2- Publish the default package's config
-```
-php artisan vendor:publish --tag=crud
-```
+1. Install
+    ```
+    composer require jmsr/crud-generator-laravel --dev
+    ```
+2. Publish the default package's config
+    ```
+    php artisan vendor:publish --tag=crud
+    ```
 
 ## Usage
 
-```
-php artisan make:crud {table_name}
+- Add `ITEMS_PER_PAGE = 10` to your .env file
 
-php artisan make:crud banks
-```
 
-Add a route in `web.php`
-```
-Route::resource('banks', 'BankController');
-```
-Route name in plural slug case.
+- Use these commands
 
-#### Options
- - Custom Route
-```
-php artisan make:crud {table_name} --route={route_name}
-```
+  ```
+  php artisan make:crud {table_name}
 
-#### Options
+  php artisan make:crud banks
+  ```
 
-### - Bootstrap -
+- Add a route in `web.php`
 
-In this case you don't need to change anything y confi file.
+  ```
+  Route::resource('banks', 'BankController');
+  ```
+  **Route name in plural slug case.*
 
- - Custom Route
-```
-php artisan make:crud {table_name} --route={route_name}
+- Copy `BaseEntity.stub` file from `vendor/jmsr/src/stubs` to your `src` directory and rename it to `BaseEntity.php`
+  
 
-```
-### - React -
 
-You need to change config file `architecture_mode` to *ddd* and `front` to *react*
+## Options
 
- - Do everything under context
+- ### Bootstrap
 
-```
-php artisan make:crud {table_name} --path={context_name}
-```
+    In this case you don't need to change anything y confi file.
+
+   - Custom Route
+
+        ```
+        php artisan make:crud {table_name} --route={route_name}
+        ```
+
+- ### React
+
+    You need to change config file `architecture_mode` to *ddd* and `front` to *react*
+
+   - Do everything under context
+
+        ```
+        php artisan make:crud {table_name} --path={context_name}
+        ```

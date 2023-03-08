@@ -594,7 +594,7 @@ abstract class GeneratorCommand extends Command
     protected function buildApiRoutes()
     {
         $routes = "\nRoute::group(['prefix' => '{{modelNameLowerCase}}'], function() {
-    Route::controller('{{modelName}}Controller')->group(function () {
+    Route::controller(\App\Http\Controllers\{{modelName}}Controller::class)->group(function () {
         Route::get('/get', 'getAction');
         Route::delete('/delete', 'deleteAction');
         Route::post('/create', 'createAction');
@@ -613,9 +613,11 @@ abstract class GeneratorCommand extends Command
 
     protected function buildBindings()
     {
+        $path = ($this->option('path')) ? '\\'.$this->option('path') : '';
+
         $replace = array_merge($this->buildReplacements(), []);
-        $controller_bind = "\$this->app->bind('{{modelName}}Controller', \App\Http\Controllers\{{modelName}}Controller::class);";
-        $repository_bind = "\$this->app->bind(\Src\Domain\Repository\{{modelName}}RepositoryInterface::class, \Src\Infrastructure\Repository\{{modelName}}Repository::class);";
+        $controller_bind = "\$this->app->bind({{modelName}}Controller::class, \App\Http\Controllers\{{modelName}}Controller::class);";
+        $repository_bind = "\$this->app->bind(\Src".$path."\Domain\Repository\{{modelName}}RepositoryInterface::class, \Src".$path."\Infrastructure\Repository\{{modelName}}Repository::class);";
 
         return [
             'controller_bind' => str_replace(
