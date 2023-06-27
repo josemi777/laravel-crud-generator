@@ -6,7 +6,7 @@
                     onChange={(e) => this.handleInputChange(e)}
                     className="border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm">
                     {this.{{modelNameLowerCase}}_selectors.{{column}}.map((option) => {
-                        return (this.state.product.{{column}} == option.code)?
+                        return (this.{{modelNameLowerCase}}_selectors.{{column}} == option.code)?
                             <option value={option.code} selected>{option.name}</option>
                             :
                             <option value={option.code}>{option.name}</option>

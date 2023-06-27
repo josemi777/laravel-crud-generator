@@ -8,15 +8,15 @@ use {{repositoryInterfaceNamespace}}\{{modelName}}RepositoryInterface;
 
 class Update{{modelName}}UseCase
 {
-    private {{modelName}}RepositoryInterface $eventRepository;
+    private {{modelName}}RepositoryInterface ${{modelNameLowerCase}}Repository;
 
     /**
      * @param Injections
      */
     public function __construct(
-        {{modelName}}RepositoryInterface ${{modelNameLowerCase}}Repostiroy,
+        {{modelName}}RepositoryInterface ${{modelNameLowerCase}}Repository,
     ) {
-        $this->{{modelNameLowerCase}}Repository = ${{modelNameLowerCase}}Repostiroy;
+        $this->{{modelNameLowerCase}}Repository = ${{modelNameLowerCase}}Repository;
     }
 
     /** 
