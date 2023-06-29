@@ -42,7 +42,7 @@ export default class Paginator extends Component {
             if (i == this.state.page-1) {
                 extraClass += " !bg-gray-700 !text-white  "
             }
-            pages.push(<li><button type="button" onClick={() => this.goToPage(i+1)} className={extraClass+ "px-3 py-2 inline-flex leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"}>{i+1}</button></li>)
+            pages.push(<li key={i}><button type="button" onClick={() => this.goToPage(i+1)} className={extraClass+ "px-3 py-2 inline-flex leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"}>{i+1}</button></li>)
         }
 
         return (
